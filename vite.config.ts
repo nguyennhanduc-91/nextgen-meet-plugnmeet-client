@@ -146,10 +146,6 @@ function getStaticFilesToCopy(): ViteStaticCopyOptions {
         dest: 'assets/',
         rename: { stripBase: 1 },
       },
-      {
-        src: '_redirects',
-        dest: './',
-      },
     ],
   };
 }
