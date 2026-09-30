@@ -1,0 +1,83 @@
+import React from 'react';
+import { MenuItem, MenuItems } from '@headlessui/react';
+import { useTranslation } from 'react-i18next';
+
+import { useAppDispatch, useAppSelector } from '../../store';
+import {
+  updateShowKeyboardShortcutsModal,
+  updateShowRoomSettingsModal,
+} from '../../store/slices/roomSettingsSlice';
+// import DarkThemeSwitcher from './darkThemeSwitcher';
+
+interface IHeaderMenusProps {
+  onOpenAlert(task: string): void;
+}
+
+const HeaderMenus = ({ onOpenAlert }: IHeaderMenusProps) => {
+  const dispatch = useAppDispatch();
+  const currentRoomId = useAppSelector((state) => state.session.currentRoom.roomId);
+  const { t } = useTranslation();
+
+  return (
+    <MenuItems
+      unmount={false}
+      className="HeaderSettingMenu origin-top-right z-50 bg-white dark:bg-dark-primary absolute ltr:right-0 rtl:-left-4 mt-2 w-[244px] shadow-dropdown-menu rounded-[15px] overflow-hidden border border-Gray-100 dark:border-Gray-700 p-2 ring-0 focus:outline-hidden"
+    >
+      {/* <div className="dark-mode block md:hidden pt-1 pb-2">
+        <DarkThemeSwitcher />
+      </div>
+      <div className="divider block md:hidden h-1 w-[110%] bg-Gray-50 -ml-3 my-0.5"></div> */}
+      <MenuItem>
+        <button
+          className="h-9 md:h-10 w-full cursor-pointer flex items-center hover:bg-Gray-50 dark:hover:bg-dark-secondary2 text-sm gap-2 leading-none font-medium text-Gray-950 dark:text-white px-2 md:px-3 rounded-lg transition-all duration-300 relative"
+          onClick={() => dispatch(updateShowRoomSettingsModal(true))}
+        >
+          <i className="pnm-settings text-primary-color dark:text-Blue2-500 text-base ltr:mr-2 rtl:ml-2 transition ease-in" />
+          {t('header.menus.settings')}
+        </button>
+      </MenuItem>
+
+      <MenuItem>
+        <button
+          className="h-9 md:h-10 w-full cursor-pointer flex items-center hover:bg-Gray-50 dark:hover:bg-dark-secondary2 text-sm gap-2 leading-none font-medium text-Gray-950 dark:text-white px-2 md:px-3 rounded-lg transition-all duration-300 relative"
+          onClick={() => {
+            const shareUrl = window.location.origin + '?join=' + (currentRoomId || 'meeting');
+            navigator.clipboard.writeText(shareUrl).then(() => {
+              alert('Đã sao chép link phòng họp!');
+            }).catch(() => {
+              prompt('Sao chép link bên dưới:', shareUrl);
+            });
+          }}
+        >
+          <svg className="text-primary-color dark:text-Blue2-500 w-4 h-4 ltr:mr-2 rtl:ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+          </svg>
+          Chia sẻ link phòng họp
+        </button>
+      </MenuItem>
+
+      <MenuItem>
+        <button
+          className="h-9 md:h-10 w-full cursor-pointer flex items-center hover:bg-Gray-50 dark:hover:bg-dark-secondary2 text-sm gap-2 leading-none font-medium text-Gray-950 dark:text-white px-2 md:px-3 rounded-lg transition-all duration-300 relative"
+          onClick={() => dispatch(updateShowKeyboardShortcutsModal(true))}
+        >
+          <i className="pnm-keyboard text-primary-color dark:text-Blue2-500 text-lg ltr:mr-2 rtl:ml-2 transition ease-in" />
+          {t('header.menus.keyboard-shortcuts')}
+        </button>
+      </MenuItem>
+
+
+      <MenuItem>
+        <button
+          className="h-9 md:h-10 w-full cursor-pointer flex items-center hover:bg-Gray-50 dark:hover:bg-dark-secondary2 text-sm gap-2 leading-none font-medium text-Gray-950 dark:text-white px-2 md:px-3 rounded-lg transition-all duration-300 relative"
+          onClick={() => onOpenAlert('logout')}
+        >
+          <i className="pnm-logout text-primary-color dark:text-Blue2-500 text-lg ltr:mr-2 rtl:ml-2 transition ease-in" />
+          {t('header.menus.logout')}
+        </button>
+      </MenuItem>
+    </MenuItems>
+  );
+};
+
+export default React.memo(HeaderMenus);

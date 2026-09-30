@@ -1,0 +1,311 @@
+import React, { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { PollInfo } from 'plugnmeet-protocol-js';
+import { AnimatePresence, motion } from 'framer-motion';
+import {
+  Disclosure,
+  DisclosureButton,
+  DisclosurePanel,
+} from '@headlessui/react';
+
+import { store } from '../../../store';
+import PollActionsMenu from './pollActionsMenu';
+import PollForm from './voteForm';
+import {
+  useGetPollResponsesDetailsQuery,
+  useGetPollResponsesResultQuery,
+} from '../../../store/services/pollsApi';
+import { PollDataWithOption } from '../utils';
+import DetailsModal from './details';
+import { BarChartIconSVG } from '../../../assets/Icons/BarChartIconSVG';
+import { QuestionMarkIconSVG } from '../../../assets/Icons/QuestionMarkIconSVG';
+import { ParticipantsIconSVG } from '../../../assets/Icons/ParticipantsIconSVG';
+import { TimerIconSVG } from '../../../assets/Icons/TimerIconSVG';
+import { useAutoClosePoll } from '../hooks/useAutoClosePoll';
+
+interface PollItemProps {
+  item: PollInfo;
+  serialNum: number;
+}
+
+const PollItem = ({ item, serialNum }: PollItemProps) => {
+  const { t } = useTranslation();
+  const isAdmin = useMemo(
+    () => !!store.getState().session.currentUser?.metadata?.isAdmin,
+    [],
+  );
+  const [viewDetails, setViewDetails] = useState<boolean>(false);
+  
+  const { cleanedQuestion, syncedDeadline } = useMemo(() => {
+    const match = item.question.match(/^\[T:(\d+)\](.*)/);
+    if (match) {
+      return {
+        syncedDeadline: parseInt(match[1], 10),
+        cleanedQuestion: match[2],
+      };
+    }
+    return {
+      syncedDeadline: null,
+      cleanedQuestion: item.question,
+    };
+  }, [item.question]);
+
+  const { hasTimer, formattedTime, remainingSeconds } = useAutoClosePoll(
+    item.id,
+    item.isRunning,
+    syncedDeadline,
+  );
+
+  // to load data with details, valid for admin
+  const [skipGetPollResponsesDetails, setSkipGetPollResponsesDetails] =
+    useState<boolean>(true);
+  const { data: pollDetailsResponses, refetch } =
+    useGetPollResponsesDetailsQuery(item.id, {
+      skip: skipGetPollResponsesDetails,
+    });
+
+  // load only the results for all other users
+  const [skipGetPollResult, setSkipGetPollResult] = useState<boolean>(true);
+  const { data: pollResponsesResult } = useGetPollResponsesResultQuery(
+    item.id,
+    {
+      skip: skipGetPollResult,
+    },
+  );
+
+  useEffect(() => {
+    if (isAdmin) {
+      setSkipGetPollResponsesDetails(false);
+    } else {
+      if (!item.isRunning) {
+        // result only can receive if this poll closed
+        setSkipGetPollResult(false);
+      }
+    }
+  }, [item.isRunning, isAdmin]);
+
+  const pollDataWithOption = useMemo((): PollDataWithOption | undefined => {
+    // Base object, crucial for all users to see the options text.
+    const baseObj: PollDataWithOption = {
+      options: {},
+      pollId: item.id,
+      question: cleanedQuestion,
+      totalRespondents: 0,
+      allRespondents: [],
+    };
+
+    for (const option of item.options) {
+      baseObj.options[option.id] = {
+        id: option.id,
+        text: option.text,
+        responsesPercentage: 0,
+        respondents: [],
+      };
+    }
+
+    // Layer on admin-specific details if available
+    if (isAdmin && pollDetailsResponses?.responses) {
+      const details = pollDetailsResponses.responses;
+      baseObj.totalRespondents = Number(details.total_resp);
+
+      for (const option of item.options) {
+        const count = Number(details[`${option.id}_count`] ?? 0);
+        if (count > 0 && baseObj.totalRespondents > 0) {
+          baseObj.options[option.id].responsesPercentage = Math.round(
+            (count / baseObj.totalRespondents + Number.EPSILON) * 100,
+          );
+        }
+      }
+
+      if (details.all_respondents) {
+        try {
+          const respondents: Array<string> = JSON.parse(
+            details.all_respondents,
+          );
+          for (const r of respondents) {
+            // format => userId:optionSelected:name
+            const data = r.split(':');
+            if (data.length === 3 && baseObj.options[data[1]]) {
+              const respondent = { userId: data[0], name: data[2] };
+              baseObj.options[data[1]].respondents.push(respondent);
+              baseObj.allRespondents.push(respondent);
+            }
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+      return baseObj;
+    }
+
+    // Layer on public results if available (for non-admins after poll ends)
+    if (pollResponsesResult?.pollResponsesResult) {
+      const result = pollResponsesResult.pollResponsesResult;
+      const totalResponses = Number(result.totalResponses);
+      baseObj.totalRespondents = totalResponses;
+
+      for (const option of result.options) {
+        if (baseObj.options[option.id]) {
+          const voteCount = Number(option.voteCount);
+          if (voteCount > 0 && totalResponses > 0) {
+            baseObj.options[option.id].responsesPercentage = Math.round(
+              (voteCount / totalResponses + Number.EPSILON) * 100,
+            );
+          }
+        }
+      }
+      return baseObj;
+    }
+
+    // For a non-admin during a running poll, no results are available yet,
+    // but the base object with options is still returned, allowing them to vote.
+    if (!isAdmin && item.isRunning) {
+      return baseObj;
+    }
+
+    // Fallback if no data is available at all.
+    return baseObj;
+  }, [item, pollDetailsResponses, pollResponsesResult, isAdmin]);
+
+  const canViewTotal = () => {
+    if (!item.isRunning) {
+      return true;
+    }
+    return isAdmin;
+  };
+
+  return (
+    <div className="polls-item-inner bg-Gray-50 dark:bg-dark-secondary2 rounded-xl">
+      <div className="head min-h-10 flex items-center justify-between w-full px-4 text-sm text-Gray-700 dark:text-white gap-3">
+        <div className="left flex items-center gap-2.5 overflow-hidden">
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#eff6ff] dark:bg-[#1e3a8a]/30 border border-[#bfdbfe] dark:border-[#1e3a8a] whitespace-nowrap shrink-0">
+            <span className="text-[#2563eb] dark:text-[#60a5fa] w-3.5 h-3.5 flex items-center justify-center"><BarChartIconSVG /></span>
+            <span className="text-[#1e40af] dark:text-[#93c5fd] font-bold text-xs">
+              #{serialNum}
+            </span>
+          </div>
+          {!item.isRunning ? (
+            <div className="whitespace-nowrap flex-shrink-0 border border-Red-200 bg-Red-100 shadow-button-shadow rounded-full h-[22px] px-2 text-xs text-Red-700 font-medium flex items-center">
+              {t('polls.poll-closed')}
+            </div>
+          ) : (
+            <>
+              <div className="whitespace-nowrap flex-shrink-0 border border-Green-200 bg-Green-100 shadow-button-shadow rounded-full h-[22px] px-2 text-xs text-Green-700 font-medium flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-Green-500 animate-pulse"></span>
+                {t('polls.poll-running')}
+              </div>
+              {hasTimer && (
+                <div className={`whitespace-nowrap flex-shrink-0 border rounded-full h-[22px] px-2 text-xs font-semibold flex items-center gap-1 shadow-button-shadow ${
+                  remainingSeconds <= 30
+                    ? 'border-Red-200 bg-Red-100 text-Red-700'
+                    : 'border-Orange-200 bg-Orange-100 text-Orange-700'
+                }`}>
+                  <TimerIconSVG classes="w-3 h-3" />
+                  {formattedTime}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+        <div className="menu relative -mr-4">
+          {isAdmin && pollDataWithOption && (
+            <PollActionsMenu
+              isRunning={item.isRunning}
+              setViewDetails={setViewDetails}
+              pollDataWithOption={pollDataWithOption}
+            />
+          )}
+        </div>
+      </div>
+      <div className="bg-white dark:bg-dark-primary px-4 py-4 border border-Gray-200 dark:border-Gray-700 shadow-button-shadow dark:shadow-none rounded-xl">
+        <Disclosure defaultOpen={item.isRunning} as="div">
+          {({ open }) => (
+            <>
+              <DisclosureButton className="flex items-center justify-between gap-3 w-full cursor-pointer">
+                <span className="text-sm text-Gray-800 dark:text-white font-medium text-left flex items-start gap-2">
+                  <span className="mt-0.5 flex-shrink-0 text-Blue-500"><QuestionMarkIconSVG /></span>
+                  <span>{cleanedQuestion}</span>
+                </span>
+                <motion.div
+                  animate={{ rotate: open ? 180 : 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="group-hover:opacity-100 transition-opacity duration-200 text-Gray-800 dark:text-white"
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="rotate-180"
+                  >
+                    <path
+                      d="M11.9999 10L7.99988 6L3.99988 10"
+                      stroke="CurrentColor"
+                      strokeWidth="1.67"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </motion.div>
+              </DisclosureButton>
+
+              <AnimatePresence>
+                {open && (
+                  <DisclosurePanel
+                    static
+                    as={motion.div}
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                  >
+                    {pollDataWithOption && (
+                      <PollForm
+                        pollDataWithOption={pollDataWithOption}
+                        isRunning={item.isRunning}
+                      />
+                    )}
+                  </DisclosurePanel>
+                )}
+              </AnimatePresence>
+            </>
+          )}
+        </Disclosure>
+        <div className="bottom-wrap flex items-center justify-between gap-2 mt-4">
+          {canViewTotal() && (
+            <div className="total-vote text-sm text-Gray-700 dark:text-dark-text flex items-center gap-1.5 font-medium whitespace-nowrap">
+              <span className="text-Gray-400 flex-shrink-0"><ParticipantsIconSVG /></span>
+              {t('polls.total-responses', {
+                count: pollDataWithOption?.totalRespondents ?? 0,
+              })}
+            </div>
+          )}
+          {isAdmin && (
+            <div className="flex-shrink-0">
+              <button
+                type="button"
+                onClick={() => setViewDetails(true)}
+                title={t('polls.view-details') || 'Chi tiết'}
+                className="view-details h-8 px-2.5 bg-Gray-50 dark:bg-Gray-800 rounded-[11px] text-sm text-Gray-800 dark:text-white font-semibold flex items-center gap-1.5 hover:bg-Gray-100 dark:hover:bg-Gray-700 transition-all duration-300 cursor-pointer whitespace-nowrap"
+              >
+                <BarChartIconSVG />
+                <span className="hidden sm:inline">{t('polls.view-details')}</span>
+              </button>
+              {viewDetails && pollDataWithOption && (
+                <DetailsModal
+                  onCloseViewDetails={() => setViewDetails(false)}
+                  pollDataWithOption={pollDataWithOption}
+                  isRunning={item.isRunning}
+                  serialNum={serialNum}
+                  refetch={refetch}
+                />
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default PollItem;

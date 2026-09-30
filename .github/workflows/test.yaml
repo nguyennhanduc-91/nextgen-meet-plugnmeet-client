@@ -1,0 +1,26 @@
+name: Test
+on:
+  pull_request:
+    branches: [main]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: setup node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 'lts/*'
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+        with:
+          version: 10
+      - name: Install dependencies
+        run: pnpm install
+      - name: lint
+        run: pnpm run lint:check
+      - name: Check format
+        run: pnpm run format:check
+      - name: Build check
+        run: pnpm run build

@@ -1,0 +1,344 @@
+@keyframes refresh {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.5;
+  }
+}
+@-webkit-keyframes wobble {
+  0% {
+    -webkit-transform: none;
+    transform: none;
+  }
+  15% {
+    -webkit-transform: translate3d(-25%, 0, 0) rotate3d(0, 0, 1, -5deg);
+    transform: translate3d(-25%, 0, 0) rotate3d(0, 0, 1, -5deg);
+  }
+  30% {
+    -webkit-transform: translate3d(20%, 0, 0) rotate3d(0, 0, 1, 3deg);
+    transform: translate3d(20%, 0, 0) rotate3d(0, 0, 1, 3deg);
+  }
+  45% {
+    -webkit-transform: translate3d(-15%, 0, 0) rotate3d(0, 0, 1, -3deg);
+    transform: translate3d(-15%, 0, 0) rotate3d(0, 0, 1, -3deg);
+  }
+  60% {
+    -webkit-transform: translate3d(10%, 0, 0) rotate3d(0, 0, 1, 2deg);
+    transform: translate3d(10%, 0, 0) rotate3d(0, 0, 1, 2deg);
+  }
+  75% {
+    -webkit-transform: translate3d(-5%, 0, 0) rotate3d(0, 0, 1, -1deg);
+    transform: translate3d(-5%, 0, 0) rotate3d(0, 0, 1, -1deg);
+  }
+  100% {
+    -webkit-transform: none;
+    transform: none;
+  }
+}
+@keyframes wobble {
+  0% {
+    -webkit-transform: none;
+    transform: none;
+  }
+  15% {
+    -webkit-transform: translate3d(-25%, 0, 0) rotate3d(0, 0, 1, -5deg);
+    transform: translate3d(-25%, 0, 0) rotate3d(0, 0, 1, -5deg);
+  }
+  30% {
+    -webkit-transform: translate3d(20%, 0, 0) rotate3d(0, 0, 1, 3deg);
+    transform: translate3d(20%, 0, 0) rotate3d(0, 0, 1, 3deg);
+  }
+  45% {
+    -webkit-transform: translate3d(-15%, 0, 0) rotate3d(0, 0, 1, -3deg);
+    transform: translate3d(-15%, 0, 0) rotate3d(0, 0, 1, -3deg);
+  }
+  60% {
+    -webkit-transform: translate3d(10%, 0, 0) rotate3d(0, 0, 1, 2deg);
+    transform: translate3d(10%, 0, 0) rotate3d(0, 0, 1, 2deg);
+  }
+  75% {
+    -webkit-transform: translate3d(-5%, 0, 0) rotate3d(0, 0, 1, -1deg);
+    transform: translate3d(-5%, 0, 0) rotate3d(0, 0, 1, -1deg);
+  }
+  100% {
+    -webkit-transform: none;
+    transform: none;
+  }
+}
+@keyframes pulse2 {
+  0% {
+    box-shadow: 0 0 5px 0 rgba(242, 0, 0, 0.3);
+  }
+  65% {
+    box-shadow: 0 0 5px 10px rgb(242, 242, 242, 0.1);
+  }
+  90% {
+    box-shadow: 0 0 5px 10px rgb(242, 242, 242, 0);
+  }
+}
+@keyframes lds-ripple2 {
+  0% {
+    top: 16px;
+    left: 16px;
+    width: 0;
+    height: 0;
+    opacity: 1;
+  }
+  100% {
+    top: 0;
+    left: 0;
+    width: 30px;
+    height: 30px;
+    opacity: 0;
+  }
+}
+.shake {
+  -webkit-animation-name: wobble;
+  animation-name: wobble;
+  -webkit-animation-duration: 0.8s;
+  -webkit-animation-iteration-count: infinite;
+  -webkit-animation-timing-function: linear;
+  -webkit-transform-origin: 50% 100%;
+  display: inline-block;
+}
+
+.hiddenAnimation {
+  animation: refresh 0.5s infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Emoji Reactions — Premium Animation System
+   ═══════════════════════════════════════════════════════════ */
+
+/* Variant 1: Sway Left — gentle drift to the left while rising */
+@keyframes emoji-float-1 {
+  0% {
+    transform: translateY(0) translateX(0) scale(0.5) rotate(0deg);
+    opacity: 0;
+  }
+  8% {
+    transform: translateY(-30px) translateX(0) scale(1.2) rotate(0deg);
+    opacity: 1;
+  }
+  25% {
+    transform: translateY(-120px) translateX(-20px) scale(1.15) rotate(-6deg);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-260px) translateX(-35px) scale(1.05) rotate(-12deg);
+    opacity: 0.85;
+  }
+  75% {
+    transform: translateY(-400px) translateX(-15px) scale(0.9) rotate(-5deg);
+    opacity: 0.45;
+  }
+  100% {
+    transform: translateY(-550px) translateX(-25px) scale(0.6) rotate(-8deg);
+    opacity: 0;
+  }
+}
+
+/* Variant 2: Sway Right — gentle drift to the right while rising */
+@keyframes emoji-float-2 {
+  0% {
+    transform: translateY(0) translateX(0) scale(0.5) rotate(0deg);
+    opacity: 0;
+  }
+  8% {
+    transform: translateY(-25px) translateX(0) scale(1.25) rotate(0deg);
+    opacity: 1;
+  }
+  25% {
+    transform: translateY(-110px) translateX(25px) scale(1.1) rotate(8deg);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-250px) translateX(40px) scale(1) rotate(14deg);
+    opacity: 0.8;
+  }
+  75% {
+    transform: translateY(-380px) translateX(20px) scale(0.85) rotate(6deg);
+    opacity: 0.4;
+  }
+  100% {
+    transform: translateY(-520px) translateX(30px) scale(0.55) rotate(10deg);
+    opacity: 0;
+  }
+}
+
+/* Variant 3: Center Rise — straight up with pulse effect */
+@keyframes emoji-float-3 {
+  0% {
+    transform: translateY(0) scale(0.4);
+    opacity: 0;
+  }
+  6% {
+    transform: translateY(-20px) scale(1.35);
+    opacity: 1;
+  }
+  15% {
+    transform: translateY(-70px) scale(1.1);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-280px) scale(1) rotate(3deg);
+    opacity: 0.9;
+  }
+  80% {
+    transform: translateY(-430px) scale(0.8) rotate(-2deg);
+    opacity: 0.35;
+  }
+  100% {
+    transform: translateY(-580px) scale(0.5);
+    opacity: 0;
+  }
+}
+
+.animate-emoji-float-1 {
+  animation: emoji-float-1 var(--emoji-duration, 3.5s) cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  will-change: transform, opacity;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
+}
+.animate-emoji-float-2 {
+  animation: emoji-float-2 var(--emoji-duration, 3.5s) cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  will-change: transform, opacity;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
+}
+.animate-emoji-float-3 {
+  animation: emoji-float-3 var(--emoji-duration, 3s) cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  will-change: transform, opacity;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
+}
+
+/* Name tag fade */
+@keyframes fade-in-out {
+  0%, 100% { opacity: 0; }
+  10%, 85% { opacity: 1; }
+}
+.animate-fade-in-out {
+  animation: fade-in-out var(--emoji-duration, 3.5s) ease-in-out forwards;
+}
+
+/* Rapid-fire bounce on emoji button */
+@keyframes emoji-btn-bounce {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.35); }
+  60% { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+.animate-emoji-bounce {
+  animation: emoji-btn-bounce 0.3s ease-out;
+}
+
+/* Particle burst — mini emojis scatter outward */
+@keyframes emoji-burst-1 {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(-40px, -60px) scale(0.3); opacity: 0; }
+}
+@keyframes emoji-burst-2 {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(35px, -55px) scale(0.3); opacity: 0; }
+}
+@keyframes emoji-burst-3 {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(-25px, -75px) scale(0.2); opacity: 0; }
+}
+@keyframes emoji-burst-4 {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(45px, -40px) scale(0.25); opacity: 0; }
+}
+@keyframes emoji-burst-5 {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(5px, -80px) scale(0.2); opacity: 0; }
+}
+.animate-burst-1 { animation: emoji-burst-1 0.6s ease-out forwards; }
+.animate-burst-2 { animation: emoji-burst-2 0.55s ease-out forwards; }
+.animate-burst-3 { animation: emoji-burst-3 0.65s ease-out forwards; }
+.animate-burst-4 { animation: emoji-burst-4 0.5s ease-out forwards; }
+.animate-burst-5 { animation: emoji-burst-5 0.6s ease-out forwards; }
+
+/* Emoji Storm — Rain down from top */
+@keyframes emoji-rain {
+  0% {
+    transform: translateY(-20px) rotate(0deg) scale(0.3);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+    transform: translateY(10vh) rotate(15deg) scale(1);
+  }
+  50% {
+    transform: translateY(50vh) rotate(-10deg) scale(0.9);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(100vh) rotate(20deg) scale(0.4);
+    opacity: 0;
+  }
+}
+.animate-emoji-rain {
+  animation: emoji-rain var(--emoji-duration, 3s) linear forwards;
+  will-change: transform, opacity;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   AI Chat — Animation System
+   ═══════════════════════════════════════════════════════════ */
+
+/* AI Typing Dots */
+@keyframes ai-typing-bounce {
+  0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(-4px); }
+}
+.ai-typing-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.ai-typing-dots span {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  animation: ai-typing-bounce 1.4s infinite;
+}
+.ai-typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.ai-typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+/* AI Avatar Pulse */
+@keyframes ai-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
+  50% { box-shadow: 0 0 0 6px rgba(99, 102, 241, 0); }
+}
+.ai-avatar-pulse {
+  animation: ai-pulse 2s ease-in-out infinite;
+}
+
+/* Slow brain spin for thinking indicator */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.animate-spin-slow {
+  animation: spin-slow 3s linear infinite;
+}
+
+/* Thinking content slide */
+.ai-thinking-content {
+  animation: ai-thinking-slide 0.2s ease-out;
+}
+@keyframes ai-thinking-slide {
+  from { opacity: 0; max-height: 0; }
+  to { opacity: 1; max-height: 200px; }
+}
+
+/* Thinking stream text fade */
+.ai-thinking-stream {
+  animation: ai-fade-in 0.3s ease-out;
+}
+@keyframes ai-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

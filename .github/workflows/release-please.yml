@@ -1,0 +1,78 @@
+name: Build and release client
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-client:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: setup node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 'lts/*'
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+        with:
+          version: 10
+      - name: Install dependencies
+        run: pnpm install
+      - name: Release as beta
+        if: ${{ ! steps.release.outputs.release_created }}
+        run: |
+          # update package version
+          pnpm version prerelease --no-commit-hooks --no-git-tag-version
+
+          # push changes
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add .
+          git commit -m "bump beta version" --no-verify
+          git push
+
+          # now create zip file
+          pnpm run build
+          echo ${BETA_VERSION} > dist/version.txt
+          mkdir -p tmp/client
+          rsync -ar LICENSE dist tmp/client/
+          cd tmp
+          zip -X -r client.zip client
+      - name: Upload by ftp
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        if: ${{ ! steps.release.outputs.release_created }}
+        with:
+          server: ${{ secrets.PNM_FTP_HOST }}
+          username: ${{ secrets.PNM_FTP_USER }}
+          password: ${{ secrets.PNM_FTP_PASSWORD }}
+          local-dir: './tmp/'
+          state-name: '.client-sync-state.json'
+          exclude: |
+            **/client/**
+      - name: Release as production
+        if: ${{ steps.release.outputs.release_created }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          pnpm run build
+
+          ## save latest version tag
+          echo ${{ steps.release.outputs.tag_name }} > dist/version.txt
+
+          mkdir -p tmp/client
+          rsync -ar LICENSE dist tmp/client/
+          cd tmp
+          zip -X -r client.zip client
+          gh release upload ${{ steps.release.outputs.tag_name }} client.zip
