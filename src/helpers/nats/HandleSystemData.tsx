@@ -33,7 +33,9 @@ export default class HandleSystemData {
    * @param data
    */
   public handleNotification = (data: string) => {
-    const nt = fromJsonString(NatsSystemNotificationSchema, data);
+    const nt = fromJsonString(NatsSystemNotificationSchema, data, {
+      ignoreUnknownFields: true,
+    });
     switch (nt.type) {
       case NatsSystemNotificationTypes.NATS_SYSTEM_NOTIFICATION_INFO:
         store.dispatch(
@@ -164,7 +166,9 @@ export default class HandleSystemData {
   };
 
   public handleInsightsAITextData = (msg: string) => {
-    const data = fromJsonString(InsightsAITextChatStreamResultSchema, msg);
+    const data = fromJsonString(InsightsAITextChatStreamResultSchema, msg, {
+      ignoreUnknownFields: true,
+    });
     store.dispatch(updateAiTextChat(data as InsightsAITextChatStreamResult));
   };
 

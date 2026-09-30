@@ -122,12 +122,18 @@ export default class HandleDataMessage {
             }
             if (data.type === 'CUSTOM_LOCK_SETTING') {
               const { service, enabled } = data;
-              if (service === 'watermark') store.dispatch(updateIsWatermarkEnabled(enabled));
-              if (service === 'focus_mode') store.dispatch(updateIsFocusModeEnabled(enabled));
-              if (service === 'host_only_chat') store.dispatch(updateIsHostOnlyChatEnabled(enabled));
-              if (service === 'require_video') store.dispatch(updateIsRequireVideoEnabled(enabled));
-              if (service === 'lock_reactions') store.dispatch(updateIsLockReactionsEnabled(enabled));
-              if (service === 'allow_view_other_users_list') store.dispatch(updateAllowViewOtherUsersList(enabled));
+              if (service === 'watermark')
+                store.dispatch(updateIsWatermarkEnabled(enabled));
+              if (service === 'focus_mode')
+                store.dispatch(updateIsFocusModeEnabled(enabled));
+              if (service === 'host_only_chat')
+                store.dispatch(updateIsHostOnlyChatEnabled(enabled));
+              if (service === 'require_video')
+                store.dispatch(updateIsRequireVideoEnabled(enabled));
+              if (service === 'lock_reactions')
+                store.dispatch(updateIsLockReactionsEnabled(enabled));
+              if (service === 'allow_view_other_users_list')
+                store.dispatch(updateAllowViewOtherUsersList(enabled));
               return;
             }
             if (data.type === 'REQ_CUSTOM_LOCK_SETTINGS') {
@@ -143,22 +149,47 @@ export default class HandleDataMessage {
                     require_video: state.isRequireVideoEnabled,
                     lock_reactions: state.isLockReactionsEnabled,
                     spotlightUserIds: state.spotlightUserIds,
-                    allow_view_other_users_list: sessionState.currentRoom.metadata?.roomFeatures?.allowViewOtherUsersList
-                  }
+                    allow_view_other_users_list:
+                      sessionState.currentRoom.metadata?.roomFeatures
+                        ?.allowViewOtherUsersList,
+                  },
                 });
-                this.connectNats.sendDataMessage(DataMsgBodyType.INFO, replyMsg, payload.fromUserId).then();
+                this.connectNats
+                  .sendDataMessage(
+                    DataMsgBodyType.INFO,
+                    replyMsg,
+                    payload.fromUserId,
+                  )
+                  .then();
               }
               return;
             }
             if (data.type === 'RES_CUSTOM_LOCK_SETTINGS') {
               const { settings } = data;
-              if (settings.watermark !== undefined) store.dispatch(updateIsWatermarkEnabled(settings.watermark));
-              if (settings.focus_mode !== undefined) store.dispatch(updateIsFocusModeEnabled(settings.focus_mode));
-              if (settings.host_only_chat !== undefined) store.dispatch(updateIsHostOnlyChatEnabled(settings.host_only_chat));
-              if (settings.require_video !== undefined) store.dispatch(updateIsRequireVideoEnabled(settings.require_video));
-              if (settings.lock_reactions !== undefined) store.dispatch(updateIsLockReactionsEnabled(settings.lock_reactions));
-              if (settings.spotlightUserIds !== undefined) store.dispatch(setSpotlightUserIds(settings.spotlightUserIds));
-              if (settings.allow_view_other_users_list !== undefined) store.dispatch(updateAllowViewOtherUsersList(settings.allow_view_other_users_list));
+              if (settings.watermark !== undefined)
+                store.dispatch(updateIsWatermarkEnabled(settings.watermark));
+              if (settings.focus_mode !== undefined)
+                store.dispatch(updateIsFocusModeEnabled(settings.focus_mode));
+              if (settings.host_only_chat !== undefined)
+                store.dispatch(
+                  updateIsHostOnlyChatEnabled(settings.host_only_chat),
+                );
+              if (settings.require_video !== undefined)
+                store.dispatch(
+                  updateIsRequireVideoEnabled(settings.require_video),
+                );
+              if (settings.lock_reactions !== undefined)
+                store.dispatch(
+                  updateIsLockReactionsEnabled(settings.lock_reactions),
+                );
+              if (settings.spotlightUserIds !== undefined)
+                store.dispatch(setSpotlightUserIds(settings.spotlightUserIds));
+              if (settings.allow_view_other_users_list !== undefined)
+                store.dispatch(
+                  updateAllowViewOtherUsersList(
+                    settings.allow_view_other_users_list,
+                  ),
+                );
               return;
             }
             if (data.type === 'GLOBAL_SPOTLIGHT') {
@@ -187,7 +218,12 @@ export default class HandleDataMessage {
               return;
             }
             if (data.type === 'WEBINAR_QA_UPVOTE') {
-              store.dispatch(upvoteQuestion({ id: data.payload.id, userId: data.payload.userId }));
+              store.dispatch(
+                upvoteQuestion({
+                  id: data.payload.id,
+                  userId: data.payload.userId,
+                }),
+              );
               return;
             }
             if (data.type === 'WEBINAR_QA_LIVE_ANSWER') {
@@ -209,12 +245,14 @@ export default class HandleDataMessage {
             if (data.type === 'WEBINAR_TIMER_ACK') {
               const currentTimer = store.getState().roomSettings.timer;
               if (currentTimer) {
-                store.dispatch(updateTimer({ ...currentTimer, isAcknowledged: true }));
+                store.dispatch(
+                  updateTimer({ ...currentTimer, isAcknowledged: true }),
+                );
               }
               return;
             }
           }
-        } catch (e) {
+        } catch {
           // Not JSON or parse error, fallback to regular info
         }
 
@@ -326,7 +364,9 @@ export default class HandleDataMessage {
       return;
     }
     const lang = store.getState().speechServices.selectedSubtitleLang;
-    const data = fromJsonString(InsightsTranscriptionResultSchema, message);
+    const data = fromJsonString(InsightsTranscriptionResultSchema, message, {
+      ignoreUnknownFields: true,
+    });
 
     if (lang !== '') {
       const d = new Date();

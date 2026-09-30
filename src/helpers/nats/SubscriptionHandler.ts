@@ -132,7 +132,9 @@ export default class SubscriptionHandler {
   }
 
   private async handlePrivateDataDelivery(p: NatsMsgServerToClient) {
-    const header = fromJsonString(PrivateDataDeliverySchema, p.msg);
+    const header = fromJsonString(PrivateDataDeliverySchema, p.msg, {
+      ignoreUnknownFields: true,
+    });
     switch (header.type as PrivateDataDeliveryType) {
       case 'CHAT':
         await this.processToHandleChatMsg(p.binMsg);
@@ -492,7 +494,9 @@ export default class SubscriptionHandler {
    */
   private async handleMediaServerData(msg: string) {
     try {
-      const serverInfo = fromJsonString(MediaServerConnInfoSchema, msg);
+      const serverInfo = fromJsonString(MediaServerConnInfoSchema, msg, {
+        ignoreUnknownFields: true,
+      });
       if (this.connectNats.mediaServerConn) {
         await this.connectNats.mediaServerConn.initializeConnection(serverInfo);
       }

@@ -125,7 +125,9 @@ export default class HandleParticipants {
     let participant: NatsKvUserInfo;
     if (typeof p === 'string') {
       try {
-        participant = fromJsonString(NatsKvUserInfoSchema, p);
+        participant = fromJsonString(NatsKvUserInfoSchema, p, {
+          ignoreUnknownFields: true,
+        });
       } catch (e) {
         console.error(e);
         return Promise.resolve();
@@ -147,11 +149,12 @@ export default class HandleParticipants {
         return false;
       }
       const roomMetadata = store.getState().session?.currentRoom.metadata;
-      
+
       const adminOnlyWebcams = !!roomMetadata?.roomFeatures?.adminOnlyWebcams;
-      const allowViewOtherWebcams = !!roomMetadata?.roomFeatures?.allowViewOtherWebcams;
+      const allowViewOtherWebcams =
+        !!roomMetadata?.roomFeatures?.allowViewOtherWebcams;
       const isMeetingMode = allowViewOtherWebcams && !adminOnlyWebcams;
-      
+
       if (
         !participant.isAdmin &&
         !this._isLocalUserAdmin &&
@@ -302,7 +305,9 @@ export default class HandleParticipants {
   public handleParticipantDisconnected = (data: string) => {
     let participant: NatsKvUserInfo;
     try {
-      participant = fromJsonString(NatsKvUserInfoSchema, data);
+      participant = fromJsonString(NatsKvUserInfoSchema, data, {
+        ignoreUnknownFields: true,
+      });
     } catch (e) {
       console.error(e);
       return Promise.resolve();
@@ -322,7 +327,9 @@ export default class HandleParticipants {
   public handleParticipantOffline = (data: string) => {
     let p: NatsKvUserInfo;
     try {
-      p = fromJsonString(NatsKvUserInfoSchema, data);
+      p = fromJsonString(NatsKvUserInfoSchema, data, {
+        ignoreUnknownFields: true,
+      });
     } catch (e) {
       console.error(e);
       return Promise.resolve();
@@ -403,7 +410,22 @@ export default class HandleParticipants {
 
   private decodeMetadata(data: string): ICurrentUserMetadata {
     try {
-      return fromJsonString(UserMetadataSchema, data);
+      let json = JSON.parse(data);
+      if (
+        json &&
+        typeof json.raised_hand === 'object' &&
+        json.raised_hand !== null
+      ) {
+        json.raised_hand = !!json.raised_hand.is_raised;
+      }
+      if (
+        json &&
+        typeof json.raisedHand === 'object' &&
+        json.raisedHand !== null
+      ) {
+        json.raisedHand = !!json.raisedHand.is_raised;
+      }
+      return fromJson(UserMetadataSchema, json, { ignoreUnknownFields: true });
     } catch (e) {
       console.error(e);
     }
